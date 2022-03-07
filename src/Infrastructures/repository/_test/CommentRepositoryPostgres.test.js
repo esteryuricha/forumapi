@@ -99,7 +99,6 @@ describe('CommentRepositoryPostgres', () => {
 
         it('should return comment correctly when it found', async() => {
             //arrange
-            //arrange
             await CommentsTableTestHelper.addComment({
                 id: 'comment-123',
                 threadId: 'thread-123',
