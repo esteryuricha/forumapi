@@ -20,8 +20,7 @@ class CommentRepositoryPostgres extends CommentRepository {
         const query = {
             text: 'INSERT INTO comments VALUES($1, $2, $3, $4, $5, $6) RETURNING id, content, owner',
             values: [id, threadId, content, owner, date, isDelete],
-        };
-      
+        };      
         const result = await this._pool.query(query);
       
         return new AddedComment({ ...result.rows[0] });
@@ -81,7 +80,7 @@ class CommentRepositoryPostgres extends CommentRepository {
                 id: payload.id,
                 username: payload.username,
                 date: payload.date,
-                content: payload.is_delete ? '**komentar telah dihapus**' : payload.content,
+                content: payload.content,
                 isDelete: payload.is_delete
             })
         ));

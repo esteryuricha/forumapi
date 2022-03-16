@@ -29,7 +29,7 @@ const CommentsTableTestHelper =  {
     },
 
     async cleanTable() {
-        await pool.query('TRUNCATE comments');
+        await pool.query('DELETE FROM comments');
     }
 }
 

@@ -34,6 +34,25 @@ exports.up = (pgm) => {
             notNull: true,
         }
     });
+
+    pgm.addConstraint(
+        'replies',
+        'fk_replies.owner_users.id',
+        'FOREIGN KEY(owner) REFERENCES users(id) on UPDATE CASCADE'
+    );
+
+    pgm.addConstraint(
+        'replies',
+        'fk_replies.comment_id_threads.id',
+        'FOREIGN KEY(comment_id) REFERENCES comments(id) ON UPDATE CASCADE'
+    );
+
+    pgm.addConstraint(
+        'replies',
+        'fk_replies.thread_id_threads.id',
+        'FOREIGN KEY(thread_id) REFERENCES threads(id) ON UPDATE CASCADE'
+    );
+
 };
 
 exports.down = (pgm) => {

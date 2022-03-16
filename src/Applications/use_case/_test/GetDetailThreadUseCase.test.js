@@ -1,8 +1,10 @@
 const GetDetailThreadUseCase = require('../GetDetailThreadUseCase');
+const GetReply = require('../../../Domains/replies/entities/GetReply');
 const GetComment = require('../../../Domains/comments/entities/GetComment');
 const GetThread = require('../../../Domains/threads/entities/GetThread');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
+const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
 
 describe('GetDetailThreadUseCase', () => {
     it('should orchestrating get detail thread action correctly', async() => {
@@ -23,7 +25,7 @@ describe('GetDetailThreadUseCase', () => {
                 id: 'comment-456',
                 username: 'johndoe',
                 date: '2022-03-06T03:58:30.111Z',
-                content: '**komentar telah dihapus**',
+                content: 'ini adalah content2',
                 isDelete: true
             })
         ];
@@ -34,7 +36,6 @@ describe('GetDetailThreadUseCase', () => {
             body: 'Tugas ForumAPI harus selesai sebelum deadline',
             date: '2022-03-05T02:04:43.260Z',
             username: 'dicoding',
-            comments: expectedGetComments,
         });
 
         const mockThreadRepository = new ThreadRepository();
@@ -57,6 +58,6 @@ describe('GetDetailThreadUseCase', () => {
         //assert
         expect(mockCommentRepository.getComment).toBeCalledWith('thread-123');
         expect(mockThreadRepository.getDetailThread).toBeCalledWith('thread-123');
-        expect(thread).toEqual(new GetThread({ ...expectedGetDetailThread, comments: expectedGetComments}));
+        expect(thread).toEqual({ ...expectedGetDetailThread, comments: expectedGetComments });
     });
 });

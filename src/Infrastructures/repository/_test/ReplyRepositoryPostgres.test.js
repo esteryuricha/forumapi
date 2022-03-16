@@ -5,10 +5,9 @@ const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper
 const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
 const RepliesTableTestHelper = require('../../../../tests/RepliesTableTestHelper');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
-const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 const AddReply = require('../../../Domains/replies/entities/AddReply');
 const AddedReply = require('../../../Domains/replies/entities/AddedReply');
-const GetReply = require('../../../Domains/replies/entities/GetReply');
+const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 
 describe('ReplyRepositoryPostgres', () => {
     beforeEach(async() => {
@@ -30,16 +29,16 @@ describe('ReplyRepositoryPostgres', () => {
         await CommentsTableTestHelper.addComment({
             id: 'comment-123',
             content: 'ini adalah comment',
-            owner: 'user-456',
+            owner: 'user-123',
             date: '2022-03-05T03:04:43.260Z'
         });
     });
 
     afterEach(async() => {
+        await RepliesTableTestHelper.cleanTable();
+        await CommentsTableTestHelper.cleanTable();
         await ThreadsTableTestHelper.cleanTable();
         await UsersTableTestHelper.cleanTable();
-        await CommentsTableTestHelper.cleanTable();
-        await RepliesTableTestHelper.cleanTable();
     });
 
     afterAll(async() => {
@@ -88,6 +87,134 @@ describe('ReplyRepositoryPostgres', () => {
                 content : 'ini adalah balasan',
                 owner: 'user-123'
             }));
+        });
+    });
+
+    describe('checkReplyById function', () => {
+        it('should throw error when reply not found', async() => {
+            //arrange
+            await RepliesTableTestHelper.addReply({
+                id: 'reply-123',
+                threadId: 'thread-123',
+                commentId: 'comment-123',
+                content: 'ini adalah balasan',
+                owner: 'user-123',
+                date: '2022-03-16T03:48:30.111Z'
+            });
+
+            const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+            //action and assert
+            await expect(replyRepositoryPostgres.checkReplyById('reply')).rejects.toThrowError(NotFoundError);            
+        });
+
+        it('should return reply correctly when it found', async() => {
+            //arrange
+            await RepliesTableTestHelper.addReply({
+                id: 'reply-123',
+                threadId: 'thread-123',
+                commentId: 'comment-123',
+                content: 'ini adalah balasan',
+                owner: 'user-123',
+                date: '2022-03-16T03:48:30.111Z'
+            });
+            
+            const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+            //action
+            const replyId = await replyRepositoryPostgres.checkReplyById('reply-123');
+
+            //assert
+            expect(replyId).toEqual('reply-123');
+        });
+    });
+
+    describe('checkReplyOwner function', () => {
+        it('should throw AuthorizationError when not owner', async() => {
+            //arrange
+            await RepliesTableTestHelper.addReply({
+                id: 'reply-123',
+                threadId: 'thread-123',
+                commentId: 'comment-123',
+                content: 'ini adalah balasan',
+                owner: 'user-123',
+                date: '2022-03-16T03:48:30.111Z'
+            });
+
+            const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+            //action and assert
+            await expect(replyRepositoryPostgres.checkReplyOwner('reply-123', 'user-456')).rejects.toThrowError(AuthorizationError);
+        });
+
+        it('should not throw error when owner is valid', async() => {
+            //arrange
+            await RepliesTableTestHelper.addReply({
+                id: 'reply-123',
+                threadId: 'thread-123',
+                commentId: 'comment-123',
+                content: 'ini adalah balasan',
+                owner: 'user-123',
+                date: '2022-03-16T03:48:30.111Z'
+            });
+
+            const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+            //action and assert
+            await expect(replyRepositoryPostgres.checkReplyOwner('reply-123', 'user-123')).resolves.toBeUndefined();        
+        });
+    });
+
+    describe('deleteReply function', () => {
+        it('should throw error when reply not found', async() => {
+            //arrange
+            await RepliesTableTestHelper.addReply({
+                id: 'reply-123',
+                threadId: 'thread-123',
+                commentId: 'comment-123',
+                content: 'ini adalah balasan',
+                owner: 'user-123',
+                date: '2022-03-16T03:48:30.111Z'
+            });
+
+            const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+            //action and assert
+            await expect(replyRepositoryPostgres.deleteReply('reply-456')).rejects.toThrowError(NotFoundError);        
+        });
+
+        it('should delete reply correctly', async() => {
+            //arrange
+            await RepliesTableTestHelper.addReply({
+                id: 'reply-123',
+                threadId: 'thread-123',
+                commentId: 'comment-123',
+                content: 'ini adalah balasan',
+                owner: 'user-123',
+                date: '2022-03-16T03:48:30.111Z'
+            });
+
+            const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+            //action
+            await replyRepositoryPostgres.deleteReply('reply-123');
+
+            //assert
+            const reply  = await RepliesTableTestHelper.checkReplyById('reply-123');
+            expect(reply[0].is_delete).toEqual(true);
+        });
+    });
+
+    describe('getReply function', () => {
+        it('should return empty array when reply not found', async() => {
+            //arrange
+            const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+            //action 
+            const replies = await replyRepositoryPostgres.getReply('reply-123');
+
+            //assert
+            expect(replies).toStrictEqual([]);
         });
     });
 });

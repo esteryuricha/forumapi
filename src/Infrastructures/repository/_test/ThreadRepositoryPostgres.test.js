@@ -119,7 +119,7 @@ describe('ThreadRepositoryPostgres', () => {
             const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
             //action and assert
-            await expect(threadRepositoryPostgres.checkThreadById('thread-456')).rejects.toThrowError(NotFoundError);
+            await expect(threadRepositoryPostgres.getDetailThread('thread-456')).rejects.toThrowError('Thread not Found!');
         });
 
         it('should return value when thread found', async() => {
@@ -144,6 +144,7 @@ describe('ThreadRepositoryPostgres', () => {
                 body: 'Tugas ForumAPI harus selesai sebelum deadline',
                 username: 'dicoding',
                 date: '2022-03-05T02:04:43.260Z',
+                comments: []
             });
         });
     });

@@ -17,7 +17,6 @@ describe('GetThread entities', () => {
             body: true,
             date: {},
             username: true,
-            comments: true
         };
 
         //action and assert
@@ -32,23 +31,6 @@ describe('GetThread entities', () => {
             body: 'Tugas ForumAPI harus selesai sebelum deadline',
             date: '2022-03-05T02:04:43.260Z',
             username: 'dicoding',
-            comments: [
-                {
-                    id: 'comment-123',
-                    username: 'dicoding',
-                    date: '2022-03-06T03:48:30.111Z',
-                    content: 'ini adalah content',
-                    isDelete: false,
-                },
-                {
-                    id: 'comment-456',
-                    username: 'johndoe',
-                    date: '2022-03-06T03:58:30.111Z',
-                    content: '**komentar telah dihapus**',
-                    isDelete: true
-                }
-            ],
-
         };
 
         //action
@@ -60,6 +42,5 @@ describe('GetThread entities', () => {
         expect(getThread.body).toEqual(payload.body);
         expect(getThread.username).toEqual(payload.username);
         expect(getThread.date).toEqual(payload.date);
-        expect(getThread.comments).toEqual(payload.comments);
     });
 });

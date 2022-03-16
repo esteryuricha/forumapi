@@ -11,8 +11,8 @@ const RepliesTableTestHelper = {
         date = '2022-03-07T05:48:30.111Z',
     }) {
         const query = {
-            text: 'INSERT INTO replies (id, thread_id, comment_id, content, owner, date) VALUES($1, $2, $3, $4, $5, $6)',
-            value: [id, threadId, commentId, content, owner, date]
+            text: 'INSERT INTO replies VALUES($1, $2, $3, $4, $5, $6)',
+            values: [id, threadId, commentId, content, date, owner]
         };
 
         await pool.query(query);
@@ -30,7 +30,7 @@ const RepliesTableTestHelper = {
     },
 
     async cleanTable() {
-        await pool.query('TRUNCATE table replies');
+        await pool.query('DELETE FROM replies');
     }
 };
 
