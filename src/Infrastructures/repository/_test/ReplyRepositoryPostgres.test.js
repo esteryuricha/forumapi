@@ -8,6 +8,7 @@ const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AddReply = require('../../../Domains/replies/entities/AddReply');
 const AddedReply = require('../../../Domains/replies/entities/AddedReply');
 const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
+const GetReply = require('../../../Domains/replies/entities/GetReply');
 
 describe('ReplyRepositoryPostgres', () => {
     beforeEach(async() => {
@@ -216,5 +217,60 @@ describe('ReplyRepositoryPostgres', () => {
             //assert
             expect(replies).toStrictEqual([]);
         });
+
+        it('should get reply correctly', async() => {
+            //arrange
+            await UsersTableTestHelper.addUser({
+                id: 'user-456',
+                username: 'johndoe',
+                password: 'password',
+                fullname: 'John Doe'
+            });
+
+            await RepliesTableTestHelper.addReply({
+                id: 'reply-123',
+                threadId: 'thread-123',
+                commentId: 'comment-123',
+                content: 'ini adalah balasan',
+                owner: 'user-456',
+                date: '2022-03-16T03:48:30.111Z',
+                isDelete: false
+            });
+
+            await RepliesTableTestHelper.addReply({
+                id: 'reply-456',
+                threadId: 'thread-123',
+                commentId: 'comment-123',
+                content: '**balasan telah dihapus**',
+                owner: 'user-123',
+                date: '2022-03-16T03:48:30.111Z',
+                isDelete: true
+            });
+
+            const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+            //action 
+            const reply = await replyRepositoryPostgres.getReply('comment-123');
+
+            //assert
+            expect(reply).toHaveLength(2);
+            expect(reply[0]).toStrictEqual(new GetReply({
+                id: 'reply-123',
+                username: 'johndoe',
+                content: 'ini adalah balasan',
+                date: '2022-03-16T03:48:30.111Z',
+                isDelete: false
+            }));
+
+            expect(reply[1]).toStrictEqual(new GetReply({
+                id: 'reply-456',
+                username: 'dicoding',
+                content: '**balasan telah dihapus**',
+                date: '2022-03-16T03:48:30.111Z',
+                isDelete: true
+            }));
+
+            });
+
     });
 });

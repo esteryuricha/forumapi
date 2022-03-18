@@ -35,7 +35,7 @@ describe('GetDetailThreadUseCase', () => {
             title: 'Tugas ForumAPI',
             body: 'Tugas ForumAPI harus selesai sebelum deadline',
             date: '2022-03-05T02:04:43.260Z',
-            username: 'dicoding',
+            username: 'dicoding'
         });
 
         const mockThreadRepository = new ThreadRepository();
@@ -45,7 +45,7 @@ describe('GetDetailThreadUseCase', () => {
             .mockImplementation(() => Promise.resolve(expectedGetComments));
 
         mockThreadRepository.getDetailThread = jest.fn()
-            .mockImplementation(() => Promise.resolve(expectedGetDetailThread));
+            .mockImplementation(() => Promise.resolve({ ...expectedGetDetailThread, comments: []}));
 
         const getDetailThreadUseCase = new GetDetailThreadUseCase({
             threadRepository: mockThreadRepository,
