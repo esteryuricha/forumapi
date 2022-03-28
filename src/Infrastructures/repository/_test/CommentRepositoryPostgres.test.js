@@ -235,21 +235,22 @@ describe('CommentRepositoryPostgres', () => {
 
             //assert
             expect(comment).toHaveLength(2);
-            expect(comment[0]).toStrictEqual(new GetComment({
-                id: 'comment-123',
-                username: 'dicoding',
-                date: '2022-03-06T03:48:30.111Z',
-                content: 'ini adalah content',
-                isDelete: false,
-            }));
-
-            expect(comment[1]).toStrictEqual(new GetComment({
-                id: 'comment-456',
-                username: 'johndoe',
-                date: '2022-03-06T03:58:30.111Z',
-                content: '**komentar telah dihapus**',
-                isDelete: true
-            }));
+            expect(comment).toStrictEqual([
+                new GetComment({
+                    id: 'comment-123',
+                    username: 'dicoding',
+                    date: '2022-03-06T03:48:30.111Z',
+                    content: 'ini adalah content',
+                    isDelete: false,
+                }),
+                new GetComment({
+                    id: 'comment-456',
+                    username: 'johndoe',
+                    date: '2022-03-06T03:58:30.111Z',
+                    content: '**komentar telah dihapus**',
+                    isDelete: true
+                })
+            ]);
         });
     });
 });

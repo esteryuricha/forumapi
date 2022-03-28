@@ -77,10 +77,7 @@ class CommentRepositoryPostgres extends CommentRepository {
 
         return result.rows.map((payload) => (
             new GetComment({
-                id: payload.id,
-                username: payload.username,
-                date: payload.date,
-                content: payload.content,
+                ...payload,
                 isDelete: payload.is_delete
             })
         ));

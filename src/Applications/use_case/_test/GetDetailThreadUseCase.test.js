@@ -41,11 +41,9 @@ describe('GetDetailThreadUseCase', () => {
         const mockThreadRepository = new ThreadRepository();
         const mockCommentRepository = new CommentRepository();
 
-        mockCommentRepository.getComment = jest.fn()
-            .mockImplementation(() => Promise.resolve(expectedGetComments));
+        mockCommentRepository.getComment = jest.fn(() => Promise.resolve(expectedGetComments));
 
-        mockThreadRepository.getDetailThread = jest.fn()
-            .mockImplementation(() => Promise.resolve({ ...expectedGetDetailThread, comments: []}));
+        mockThreadRepository.getDetailThread = jest.fn(() => Promise.resolve({ ...expectedGetDetailThread, comments: []}));
 
         const getDetailThreadUseCase = new GetDetailThreadUseCase({
             threadRepository: mockThreadRepository,

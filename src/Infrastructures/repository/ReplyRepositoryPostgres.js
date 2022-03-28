@@ -78,10 +78,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
 
         return result.rows.map((payload) => (
             new GetReply({
-                id: payload.id,
-                username: payload.username,
-                date: payload.date,
-                content: payload.content,
+                ...payload,
                 isDelete: payload.is_delete
             })
         ));

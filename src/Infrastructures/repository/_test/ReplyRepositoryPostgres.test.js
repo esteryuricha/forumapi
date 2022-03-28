@@ -254,23 +254,22 @@ describe('ReplyRepositoryPostgres', () => {
 
             //assert
             expect(reply).toHaveLength(2);
-            expect(reply[0]).toStrictEqual(new GetReply({
-                id: 'reply-123',
-                username: 'johndoe',
-                content: 'ini adalah balasan',
-                date: '2022-03-16T03:48:30.111Z',
-                isDelete: false
-            }));
-
-            expect(reply[1]).toStrictEqual(new GetReply({
-                id: 'reply-456',
-                username: 'dicoding',
-                content: '**balasan telah dihapus**',
-                date: '2022-03-16T03:48:30.111Z',
-                isDelete: true
-            }));
-
-            });
-
+            expect(reply).toStrictEqual([
+                new GetReply({
+                    id: 'reply-123',
+                    username: 'johndoe',
+                    content: 'ini adalah balasan',
+                    date: '2022-03-16T03:48:30.111Z',
+                    isDelete: false
+                }),
+                new GetReply({
+                    id: 'reply-456',
+                    username: 'dicoding',
+                    content: '**balasan telah dihapus**',
+                    date: '2022-03-16T03:48:30.111Z',
+                    isDelete: true
+                })
+            ]);
+        });
     });
 });
