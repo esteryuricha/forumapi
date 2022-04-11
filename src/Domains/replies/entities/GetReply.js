@@ -2,12 +2,13 @@ class GetReply {
     constructor(payload) {
         this._verifyPayload(payload);
 
-        const { id, content, username, date, isDelete } = payload;
+        const { id, content, username, date, commentId, isDelete } = payload;
 
         this.id = id;
         this.content = isDelete ? '**balasan telah dihapus**' : content;
         this.username = username;
         this.date = date;
+        this.commentId = commentId;
     }
 
     _verifyPayload({ id, content, username, date }) {

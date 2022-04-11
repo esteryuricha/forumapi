@@ -1,6 +1,7 @@
 const AddedThread = require('../../Domains/threads/entities/AddedThread');
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
+const GetReply = require('../../Domains/replies/entities/GetReply');
 
 class ThreadRepositoryPostgres extends ThreadRepository {
     constructor(pool, idGenerator) {
@@ -52,6 +53,29 @@ class ThreadRepositoryPostgres extends ThreadRepository {
         }
 
         return { ... result.rows[0], comments: [] };
+    }
+
+    async getRepliesByThreadId(id) {
+        const query = {
+            text: `SELECT replies.id, replies.comment_id,
+                    replies.is_delete, replies.content,
+                    replies.date, users.username
+                    FROM replies
+                    INNER JOIN comments ON replies.comment_id = comments.id
+                    INNER JOIN users ON replies.owner = users.id
+                    WHERE replies.thread_id = $1
+                    ORDER BY date ASC`,
+            values: [id]
+        };
+
+        const result = await this._pool.query(query);       
+        return result.rows.map((entry) => 
+            new GetReply({
+                ...entry,
+                commentId: entry.comment_id,
+                isDelete: entry.is_delete
+            })
+        );
     }
 };
 
