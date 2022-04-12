@@ -5,6 +5,7 @@ const GetThread = require('../../../Domains/threads/entities/GetThread');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
+const LikeRepository = require('../../../Domains/likes/LikeRepository');
 
 describe('GetDetailThreadUseCase', () => {
     it('should orchestrating get detail thread action correctly', async() => {
@@ -12,23 +13,6 @@ describe('GetDetailThreadUseCase', () => {
         const useCasePayload = {
             threadId: 'thread-123'
         };
-
-        const expectedGetComments = [
-            new GetComment({
-                id: 'comment-123',
-                username: 'dicoding',
-                date: '2022-03-06T03:48:30.111Z',
-                content: 'ini adalah content',
-                isDelete: false,
-            }),
-            new GetComment({
-                id: 'comment-456',
-                username: 'johndoe',
-                date: '2022-03-06T03:58:30.111Z',
-                content: 'ini adalah content2',
-                isDelete: true
-            })
-        ];
 
         const expectedGetDetailThread = new GetThread({
             id: 'thread-123',
@@ -38,16 +22,57 @@ describe('GetDetailThreadUseCase', () => {
             username: 'dicoding'
         });
 
+        const expectedGetComments = [
+            new GetComment({
+                id: 'comment-123',
+                username: 'dicoding',
+                date: '2022-03-06T03:48:30.111Z',
+                content: 'ini adalah content',
+                isDelete: false,
+                replies: [],
+                likeCount: 0
+            }),
+            new GetComment({
+                id: 'comment-456',
+                username: 'johndoe',
+                date: '2022-03-06T03:58:30.111Z',
+                content: 'ini adalah content2',
+                isDelete: true,
+                replies: [],
+                likeCount: 0
+            })
+        ];
+
+        const expectedGetReplies = [
+            new GetReply({
+                id: 'reply-123',
+                username: 'dicoding',
+                date: '2022-03-26T03:58:30.111Z',
+                content: 'ini adalah balasan1',
+                isDelete: false,
+                commentId: 'comment-123'
+            }),
+            new GetReply({
+                id: 'reply-456',
+                username: 'johndoe',
+                date: '2022-03-26T04:58:30.111Z',
+                content: 'ini adalah balasan2',
+                isDelete: true,
+                commentId: 'comment-123'
+            }),
+        ];
+
         const mockThreadRepository = new ThreadRepository();
         const mockCommentRepository = new CommentRepository();
 
-        mockCommentRepository.getComment = jest.fn(() => Promise.resolve(expectedGetComments));
-
         mockThreadRepository.getDetailThread = jest.fn(() => Promise.resolve({ ...expectedGetDetailThread, comments: []}));
+        mockCommentRepository.getComment = jest.fn(() => Promise.resolve(expectedGetComments));
+        mockThreadRepository.getRepliesByThreadId = jest.fn(() => Promise.resolve(expectedGetReplies));
 
         const getDetailThreadUseCase = new GetDetailThreadUseCase({
             threadRepository: mockThreadRepository,
-            commentRepository: mockCommentRepository
+            commentRepository: mockCommentRepository,
+            likeRepository: {}
         });
 
         //action
@@ -56,6 +81,7 @@ describe('GetDetailThreadUseCase', () => {
         //assert
         expect(mockCommentRepository.getComment).toBeCalledWith('thread-123');
         expect(mockThreadRepository.getDetailThread).toBeCalledWith('thread-123');
+        expect(mockThreadRepository.getRepliesByThreadId).toBeCalledWith('thread-123');
         expect(thread).toEqual({ ...expectedGetDetailThread, comments: expectedGetComments });
     });
 });
