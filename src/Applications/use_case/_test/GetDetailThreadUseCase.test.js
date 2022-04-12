@@ -75,13 +75,47 @@ describe('GetDetailThreadUseCase', () => {
             likeRepository: {}
         });
 
+        //filtering comments
+        const {
+            isDelete: isDeleteComment123,
+            ...filteredCommentDetail123
+        } = expectedGetComments[0];
+
+        const {
+            isDelete: isDeleteComment456,
+            ...filteredCommentDetail456
+        } = expectedGetComments[1];
+
+        //filtering replies
+        const {
+            commentId: commentIdReply123, 
+            isDelete: isDeleteReply123,
+            ...filteredReplyDetail123
+        } = expectedGetReplies[0];
+
+        const {
+            commentId: commentIdReply456, 
+            isDelete: isDeleteReply456,
+            ...filteredReplyDetail456
+        } = expectedGetReplies[1];
+
+        const expectedCommentsAndReplies = [
+            { ...filteredCommentDetail123, replies: [filteredReplyDetail123] },
+            { ...filteredCommentDetail456, replies: [filteredReplyDetail456] },
+        ];
+
+        getDetailThreadUseCase.getRepliesByThreadId = jest.fn(() => Promise.resolve(expectedCommentsAndReplies));
+        getDetailThreadUseCase.getLikeCountByCommentId = jest.fn(() => Promise.resolve(expectedCommentsAndReplies));
+
         //action
         const thread = await getDetailThreadUseCase.execute(useCasePayload);
 
         //assert
-        expect(mockCommentRepository.getComment).toBeCalledWith('thread-123');
         expect(mockThreadRepository.getDetailThread).toBeCalledWith('thread-123');
+        expect(mockCommentRepository.getComment).toBeCalledWith('thread-123');
         expect(mockThreadRepository.getRepliesByThreadId).toBeCalledWith('thread-123');
-        expect(thread).toEqual({ ...expectedGetDetailThread, comments: expectedGetComments });
+        expect(thread).toEqual({ ...expectedGetDetailThread, comments: expectedCommentsAndReplies });
+        expect(getDetailThreadUseCase.getRepliesByThreadId).toBeCalledWith([ filteredCommentDetail123, filteredCommentDetail456], expectedGetReplies);
+        expect(getDetailThreadUseCase.getLikeCountByCommentId).toBeCalledWith(expectedCommentsAndReplies);
     });
 });
