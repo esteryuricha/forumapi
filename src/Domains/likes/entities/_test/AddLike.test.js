@@ -14,7 +14,8 @@ describe('AddLike', () => {
         const payload = {
             threadId: 123,
             commentId: 123,
-            owner: true
+            owner: true,
+            date: true
         };
 
         //action and assert
@@ -25,7 +26,8 @@ describe('AddLike', () => {
         const payload = {
             commentId: 'comment-123',
             owner: 'user-123',
-            threadId: 'thread-123'
+            threadId: 'thread-123',
+            date: '2022-03-05T03:04:43.260Z'
         };
 
         const addLike = new AddLike(payload);

@@ -10,13 +10,15 @@ describe('AddLikeUseCase', () => {
         const useCasePayload = {
             threadId: 'thread-123',
             commentId: 'comment-123',
-            owner: 'user-123'
+            owner: 'user-123',
+            date: '2022-03-05T03:04:43.260Z'
         };
 
         const expectedAddedLike = {
             id: 'like-123',
             commentId: useCasePayload.commentId,
-            owner: useCasePayload.owner
+            owner: useCasePayload.owner,
+            date: useCasePayload.date
         };
 
         //create dependency of use case
@@ -44,7 +46,8 @@ describe('AddLikeUseCase', () => {
         expect(mockLikeRepository.addLike).toBeCalledWith(new AddLike({
             threadId: useCasePayload.threadId,
             commentId: useCasePayload.commentId,
-            owner: useCasePayload.owner
+            owner: useCasePayload.owner,
+            date: useCasePayload.date
         }));
     });
 });

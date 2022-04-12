@@ -104,8 +104,8 @@ describe('GetDetailThreadUseCase', () => {
             { ...filteredCommentDetail456, replies: [filteredReplyDetail456] },
         ];
 
-        getDetailThreadUseCase.getRepliesByThreadId = jest.fn(() => Promise.resolve(expectedCommentsAndReplies));
-        getDetailThreadUseCase.getLikeCountByCommentId = jest.fn(() => Promise.resolve(expectedCommentsAndReplies));
+        getDetailThreadUseCase._mappingRepliesByComments = jest.fn(() => expectedCommentsAndReplies);
+        getDetailThreadUseCase._getLikeCountByComment = jest.fn(() => Promise.resolve(expectedCommentsAndReplies));
 
         //action
         const thread = await getDetailThreadUseCase.execute(useCasePayload);
@@ -115,7 +115,148 @@ describe('GetDetailThreadUseCase', () => {
         expect(mockCommentRepository.getComment).toBeCalledWith('thread-123');
         expect(mockThreadRepository.getRepliesByThreadId).toBeCalledWith('thread-123');
         expect(thread).toEqual({ ...expectedGetDetailThread, comments: expectedCommentsAndReplies });
-        expect(getDetailThreadUseCase.getRepliesByThreadId).toBeCalledWith([ filteredCommentDetail123, filteredCommentDetail456], expectedGetReplies);
-        expect(getDetailThreadUseCase.getLikeCountByCommentId).toBeCalledWith(expectedCommentsAndReplies);
+        expect(getDetailThreadUseCase._mappingRepliesByComments).toBeCalledWith([ filteredCommentDetail123, filteredCommentDetail456], expectedGetReplies);
+        expect(getDetailThreadUseCase._getLikeCountByComment).toBeCalledWith(expectedCommentsAndReplies);
+    });
+
+    it('should operate _getLikeCountByComment function properly', async() => {
+        //arrange
+        const comments = [
+            {
+                id: 'comment-123',
+                username: 'dicoding',
+                date: '2022-03-06T03:48:30.111Z',
+                content: 'ini adalah content',
+                isDelete: false,
+                replies: [{
+                    id: 'reply-123',
+                    username: 'dicoding',
+                    date: '2022-03-26T03:58:30.111Z',
+                    content: 'ini adalah balasan1',
+                }],
+                likeCount: 2
+            },
+            {
+                id: 'comment-456',
+                username: 'johndoe',
+                date: '2022-03-06T03:58:30.111Z',
+                content: 'ini adalah content2',
+                isDelete: true,
+                replies: [{
+                    id: 'reply-456',
+                    username: 'johndoe',
+                    date: '2022-03-26T04:58:30.111Z',
+                    content: 'ini adalah balasan2',
+                }],
+                likeCount: 0
+            }
+        ];
+
+        const expectedComments = [
+            {
+                ...comments[0], likeCount: 2,
+            },
+            {
+                ...comments[1], likeCount: 0
+            }
+        ];
+
+        const mockLikeRepository = new LikeRepository();
+
+        mockLikeRepository.getLikeCountByCommentId = jest.fn((commentId) => Promise.resolve(commentId === 'comment-123' ? 2 : 0));
+
+        const getDetailThreadUseCase = new GetDetailThreadUseCase({ 
+            threadRepository: {}, 
+            commentRepository: {}, 
+            likeRepository: mockLikeRepository 
+        });
+
+        const SpyGetLikeCountForComments = jest.spyOn(getDetailThreadUseCase, '_getLikeCountByComment');
+
+        //action
+        const result = await getDetailThreadUseCase._getLikeCountByComment(comments);
+
+
+        //arrange
+        expect(result).toEqual(expectedComments);
+        expect(mockLikeRepository.getLikeCountByCommentId).toBeCalledTimes(2);
+
+        SpyGetLikeCountForComments.mockClear();
+
+    });
+
+    it('should operate _mappingRepliesByComments function correctly', () => {
+        //arrange
+        const getDetailThreadUseCase = new GetDetailThreadUseCase({
+            threadRepository: {},
+            commentRepository: {},
+            likeRepository: {}
+        });
+
+        const filteredComments = [
+            {
+                id: 'comment-123',
+                username: 'dicoding',
+                date: '2022-03-06T03:48:30.111Z',
+                content: 'ini adalah content',
+                replies: [],
+                likeCount: 0
+            },
+            {
+                id: 'comment-456',
+                username: 'johndoe',
+                date: '2022-03-06T03:58:30.111Z',
+                content: 'ini adalah content2',
+                replies: [],
+                likeCount: 0
+            }
+        ];
+
+        const expectedGetReplies = [
+            new GetReply({
+                id: 'reply-123',
+                username: 'dicoding',
+                date: '2022-03-26T03:58:30.111Z',
+                content: 'ini adalah balasan1',
+                isDelete: false,
+                commentId: 'comment-123'
+            }),
+            new GetReply({
+                id: 'reply-456',
+                username: 'johndoe',
+                date: '2022-03-26T04:58:30.111Z',
+                content: 'ini adalah balasan2',
+                isDelete: true,
+                commentId: 'comment-456'
+            }),
+        ];
+
+        //filtering replies
+        const {
+            commentId: commentIdReply123, 
+            isDelete: isDeleteReply123,
+            ...filteredReplyDetail123
+        } = expectedGetReplies[0];
+
+        const {
+            commentId: commentIdReply456, 
+            isDelete: isDeleteReply456,
+            ...filteredReplyDetail456
+        } = expectedGetReplies[1];
+
+        const expectedCommentsAndReplies = [
+            { ...filteredComments[0], replies: [filteredReplyDetail123] },
+            { ...filteredComments[1], replies: [{ ...filteredReplyDetail456, content: '**balasan telah dihapus**' }] },
+        ];
+
+        const SpyGetRepliesForComments = jest.spyOn(getDetailThreadUseCase, '_mappingRepliesByComments');
+
+        //action
+        getDetailThreadUseCase._mappingRepliesByComments(filteredComments, expectedGetReplies);
+
+        //assert
+        expect(SpyGetRepliesForComments).toReturnWith(expectedCommentsAndReplies);
+
+        SpyGetRepliesForComments.mockClear();   
     });
 });

@@ -12,7 +12,7 @@ class AddLikeUseCase {
 
         await this._threadRepository.checkThreadById(addLike.threadId);
         await this._commentRepository.checkCommentById(addLike.commentId);
-
+        
         await this._likeRepository.addLike(addLike);
     }
 }

@@ -5,6 +5,8 @@ const AddThread = require('../../../Domains/threads/entities/AddThread');
 const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 const pool = require('../../database/postgres/pool');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
+const RepliesTableTestHelper = require('../../../../tests/RepliesTableTestHelper');
+const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
 
 describe('ThreadRepositoryPostgres', () => {
     beforeEach(async() => {
@@ -17,6 +19,8 @@ describe('ThreadRepositoryPostgres', () => {
     });
 
     afterEach(async() => {
+        await RepliesTableTestHelper.cleanTable();
+        await CommentsTableTestHelper.cleanTable();
         await ThreadsTableTestHelper.cleanTable();
         await UsersTableTestHelper.cleanTable();
     });
@@ -146,6 +150,47 @@ describe('ThreadRepositoryPostgres', () => {
                 date: '2022-03-05T02:04:43.260Z',
                 comments: []
             });
+        });
+    });
+
+    describe('getRepliesByThreadId function', () => {
+        it('should return all replies by thread id', async() => {
+            //arrange
+            await ThreadsTableTestHelper.addThread({
+                id: 'thread-123',
+                title: 'ini adalah title',
+                body: 'ini adalah body',
+                owner: 'user-123',
+                date: '2022-03-05T02:04:43.260Z'
+            });
+    
+            await CommentsTableTestHelper.addComment({
+                id: 'comment-123',
+                content: 'ini adalah comment',
+                owner: 'user-123',
+                date: '2022-03-05T03:04:43.260Z'
+            });
+    
+            const replyA = {
+                id: 'reply-123', commentId: 'comment-123', content: 'balasan 1', date: '2020',
+            };
+            const replyB = {
+               id: 'reply-456', commentId: 'comment-123', content: 'balasan 2', date: '2021',
+            };
+      
+              const expectedReplies = [
+                { ...replyA, username: 'dicoding' }, { ...replyB, username: 'dicoding' },
+              ];
+      
+            await RepliesTableTestHelper.addReply({ ...replyA, owner: 'user-123' });
+            await RepliesTableTestHelper.addReply({ ...replyB, owner: 'user-123' });
+    
+            //action
+            const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+            const replies = await threadRepositoryPostgres.getRepliesByThreadId('thread-123');
+
+            //assert
+            expect(replies).toEqual(expectedReplies);
         });
     });
 });

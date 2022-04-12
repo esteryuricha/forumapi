@@ -6,11 +6,12 @@ const LikesTableTestHelper = {
         id = 'like-123',
         threadId = 'thread-123',
         commentId = 'comment-123',
-        owner = 'user-123'
+        owner = 'user-123',
+        date = '2022-03-05T03:04:43.260Z'
     }) {
         const query = {
-            text: 'INSERT INTO likes VALUES($1, $2, $3, $4)',
-            values: [id, threadId, commentId, owner]
+            text: 'INSERT INTO likes VALUES($1, $2, $3, $4, $5)',
+            values: [id, threadId, commentId, owner, date]
         };
 
         await pool.query(query);

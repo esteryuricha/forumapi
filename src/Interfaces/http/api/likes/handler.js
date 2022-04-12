@@ -12,9 +12,10 @@ class LikesHandler {
     async putLikeHandler(request, h) {
         const { id: owner } = request.auth.credentials;
         const { threadId, commentId } = request.params;
+
         const addLikeUseCase = this._container.getInstance(AddLikeUseCase.name);
         await addLikeUseCase.execute({ threadId, commentId, owner });
-
+    
         const response = h.response({
             status: 'success',
         });
